@@ -36,6 +36,8 @@ REPOS=(
   "https://github.com/abdullahtarek/tennis_analysis|tennis_analysis"
 )
 
+POSE_MODEL_URL="https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task"
+
 say()  { printf '%s\n' "$*"; }
 ok()   { printf '  [ok]      %s\n' "$*"; }
 miss() { printf '  [missing] %s\n' "$*"; }
@@ -49,6 +51,8 @@ status() {
     ok "venv at $VENV"
     have_pkg cv2       && ok "opencv"    || miss "opencv (Tier 0-1)"
     have_pkg mediapipe && ok "mediapipe" || miss "mediapipe (Tier 1)"
+    [ -f "$MODELS/pose_landmarker_lite.task" ] && ok "models/pose_landmarker_lite.task" \
+      || miss "models/pose_landmarker_lite.task (Tier 1)"
     have_pkg torch     && ok "torch"     || miss "torch (Tier 2)"
     have_pkg ultralytics && ok "ultralytics" || miss "ultralytics (Tier 2)"
     have_pkg catboost  && ok "catboost"  || miss "catboost (Tier 2, ball/bounce)"
@@ -91,6 +95,17 @@ install_venv() {
   "$PY" -m pip install --quiet --upgrade pip
   say "Installing base packages ($BASIC_PKGS)..."
   "$PY" -m pip install --quiet $BASIC_PKGS
+}
+
+install_pose_model() {
+  mkdir -p "$MODELS"
+  f="$MODELS/pose_landmarker_lite.task"
+  if [ -f "$f" ] && [ "$(stat -f%z "$f" 2>/dev/null || stat -c%s "$f")" -gt 1000000 ]; then
+    ok "pose model already present"
+  else
+    say "Downloading MediaPipe pose landmarker model..."
+    curl -sL -o "$f" "$POSE_MODEL_URL" || { miss "pose model download failed"; return 1; }
+  fi
 }
 
 install_full_pkgs() {
@@ -142,8 +157,8 @@ install_weights() {
 
 case "$MODE" in
   status) status ;;
-  basic)  install_ffmpeg && install_venv && say "Basic setup done (Tiers 0-1)." && status ;;
-  full)   install_ffmpeg && install_venv && install_full_pkgs && install_repos && install_weights \
+  basic)  install_ffmpeg && install_venv && install_pose_model && say "Basic setup done (Tiers 0-1)." && status ;;
+  full)   install_ffmpeg && install_venv && install_pose_model && install_full_pkgs && install_repos && install_weights \
             && say "Full setup done." && status ;;
   *) say "Usage: setup.sh {status|basic|full}"; exit 2 ;;
 esac
