@@ -67,7 +67,7 @@ status() {
     IFS='|' read -r key id fname src <<<"$spec"
     f="$MODELS/$fname"
     # >1MB guard: gdown quota failures leave tiny HTML files behind
-    if [ -f "$f" ] && [ "$(stat -f%z "$f" 2>/dev/null || stat -c%s "$f")" -gt 1000000 ]; then
+    if [ -f "$f" ] && [ "$(stat -f%z "$f" 2>/dev/null || stat -c%s "$f")" -gt 100000 ]; then
       ok "models/$fname"
     else
       miss "models/$fname ($src)"
@@ -100,7 +100,7 @@ install_venv() {
 install_pose_model() {
   mkdir -p "$MODELS"
   f="$MODELS/pose_landmarker_lite.task"
-  if [ -f "$f" ] && [ "$(stat -f%z "$f" 2>/dev/null || stat -c%s "$f")" -gt 1000000 ]; then
+  if [ -f "$f" ] && [ "$(stat -f%z "$f" 2>/dev/null || stat -c%s "$f")" -gt 100000 ]; then
     ok "pose model already present"
   else
     say "Downloading MediaPipe pose landmarker model..."
@@ -132,7 +132,7 @@ install_weights() {
   for spec in "${WEIGHTS[@]}"; do
     IFS='|' read -r key id fname src <<<"$spec"
     f="$MODELS/$fname"
-    if [ -f "$f" ] && [ "$(stat -f%z "$f" 2>/dev/null || stat -c%s "$f")" -gt 1000000 ]; then
+    if [ -f "$f" ] && [ "$(stat -f%z "$f" 2>/dev/null || stat -c%s "$f")" -gt 100000 ]; then
       ok "models/$fname already present"
       continue
     fi
