@@ -23,6 +23,8 @@ court visible) and declines gracefully otherwise — a report always ships.
 
 ## Install
 
+macOS / Linux:
+
 ```bash
 git clone https://github.com/yinum/tennis-video-analysis ~/.agents/skills/tennis-video-analysis
 ln -s ~/.agents/skills/tennis-video-analysis ~/.claude/skills/tennis-video-analysis   # Claude Code
@@ -31,6 +33,16 @@ ln -s ~/.agents/skills/tennis-video-analysis ~/.codex/skills/tennis-video-analys
 bash ~/.agents/skills/tennis-video-analysis/scripts/setup.sh basic  # Tiers 0-1
 bash ~/.agents/skills/tennis-video-analysis/scripts/setup.sh full   # + Tier 2 (~2 GB)
 ```
+
+Windows (PowerShell; needs Python 3.10+ and git):
+
+```powershell
+git clone https://github.com/yinum/tennis-video-analysis "$env:USERPROFILE\.claude\skills\tennis-video-analysis"
+powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\.claude\skills\tennis-video-analysis\scripts\setup.ps1" basic   # or: full
+```
+
+ffmpeg installs via winget; the venv python is
+`%USERPROFILE%\.tennis-analysis\venv\Scripts\python.exe`.
 
 Heavy artifacts (venv, vendored repos, model weights, player history) live in
 `~/.tennis-analysis/`, never in the skill directory.

@@ -43,7 +43,7 @@ CONNECTIONS = [(L_SHOULDER, R_SHOULDER), (L_HIP, R_HIP),
 def fail(outdir, reason):
     outdir.mkdir(parents=True, exist_ok=True)
     (outdir / "pose_metrics.json").write_text(json.dumps(
-        {"available": False, "reason": reason}, indent=2))
+        {"available": False, "reason": reason}, indent=2), encoding="utf-8")
     print(json.dumps({"available": False, "reason": reason}))
     sys.exit(0)
 
@@ -101,7 +101,7 @@ def main():
     seg_file = adir / "segments.json"
     if not seg_file.exists():
         fail(outdir, "segments.json not found — run extract_frames.py first")
-    segments = json.loads(seg_file.read_text())
+    segments = json.loads(seg_file.read_text(encoding="utf-8"))
 
     ann_dir.mkdir(parents=True, exist_ok=True)
     landmarker = vision.PoseLandmarker.create_from_options(vision.PoseLandmarkerOptions(
@@ -214,7 +214,7 @@ def main():
         "handedness_guess": (max(set(hand_votes), key=hand_votes.count) if hand_votes else "unknown"),
         "bursts": bursts_out,
     }
-    (outdir / "pose_metrics.json").write_text(json.dumps(result, indent=2))
+    (outdir / "pose_metrics.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
     print(json.dumps({"available": True, "n_bursts_tracked": len(tracked),
                       "handedness_guess": result["handedness_guess"],
                       "annotated": [f for b in tracked for f in b["summary"].get("annotated_frames", [])]},

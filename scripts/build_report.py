@@ -144,7 +144,7 @@ def trend_svg(entries):
 
 def load_json(p):
     try:
-        return json.loads(Path(p).read_text())
+        return json.loads(Path(p).read_text(encoding="utf-8"))
     except Exception:
         return None
 
@@ -199,7 +199,7 @@ def main():
         if prior:
             prev_scores, prev_label = prior[-1]["scores"], prior[-1]["date"]
         hist["entries"] = prior + [entry]
-        hfile.write_text(json.dumps(hist, indent=2))
+        hfile.write_text(json.dumps(hist, indent=2), encoding="utf-8")
         entries_for_trend = [e for e in hist["entries"] if isinstance(e.get("ntrp"), (int, float))]
 
     # ---- markdown report ----
@@ -237,10 +237,10 @@ def main():
            for i, p in enumerate(a["development_plan"])]
     md += ["", "## What this video could not show"]
     md += [f"- {c}" for c in a["caveats"]]
-    (adir / "report.md").write_text("\n".join(md))
+    (adir / "report.md").write_text("\n".join(md), encoding="utf-8")
 
     # ---- html report ----
-    tpl = TEMPLATE.read_text()
+    tpl = TEMPLATE.read_text(encoding="utf-8")
 
     def bar(score):
         return f'<div class="bar"><i style="width:{score * 10:.0f}%"></i></div>'
@@ -335,7 +335,7 @@ def main():
     out_html = tpl
     for k, v in subs.items():
         out_html = out_html.replace("{{%s}}" % k, v or "")
-    (adir / "report.html").write_text(out_html)
+    (adir / "report.html").write_text(out_html, encoding="utf-8")
 
     published = None
     if args.publish:

@@ -180,10 +180,10 @@ def main():
             save_jpg(fn, sheet, q=85)
             sheet_files.append(f"sheets/{fn.name}")
 
-    (out / "meta.json").write_text(json.dumps(meta, indent=2))
+    (out / "meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
     (out / "segments.json").write_text(json.dumps(
         {"bursts": bursts, "overview_sheets": sheet_files,
-         "sample_step_frames": step, "n_samples": len(samples)}, indent=2))
+         "sample_step_frames": step, "n_samples": len(samples)}, indent=2), encoding="utf-8")
     cap.release()
     print(json.dumps({"outdir": str(out), "n_samples": len(samples),
                       "n_bursts": len(bursts), "overview_sheets": sheet_files,

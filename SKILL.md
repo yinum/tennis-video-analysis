@@ -24,14 +24,21 @@ do the seeing and judging, and `build_report.py` renders the deliverables.
 - `SKILL_DIR` = this skill's directory; scripts in `SKILL_DIR/scripts/`
 - `TENNIS_HOME` = `~/.tennis-analysis` (override via `$TENNIS_ANALYSIS_HOME`): venv,
   vendored repos, model weights, player history
-- `VENV_PY` = `$TENNIS_HOME/venv/bin/python`
+- `VENV_PY` = `$TENNIS_HOME/venv/bin/python` (macOS/Linux) or
+  `%USERPROFILE%\.tennis-analysis\venv\Scripts\python.exe` (Windows)
 - `ADIR` = `<video_dir>/<video_stem>_analysis/` — all per-video outputs
+
+**Windows:** use `scripts/setup.ps1` instead of `setup.sh`
+(`powershell -ExecutionPolicy Bypass -File SKILL_DIR/scripts/setup.ps1 basic|full|status`;
+ffmpeg installs via winget), substitute the Windows `VENV_PY` above in every command,
+and use `python` where the steps say `python3`. Everything else is identical.
 
 ## Workflow
 
 ### 0. Check setup (once per machine)
 
-Run `bash SKILL_DIR/scripts/setup.sh status`. If Tier 0–1 pieces are missing, run
+Run `bash SKILL_DIR/scripts/setup.sh status` (Windows: `setup.ps1 status`, see above).
+If Tier 0–1 pieces are missing, run
 `setup.sh basic` (ffmpeg + venv + OpenCV/MediaPipe — a few minutes). Tier 2 needs
 `setup.sh full` (~2 GB of torch/ultralytics plus five pretrained weights from
 Google Drive) — ask the user before triggering that download the first time; if

@@ -43,7 +43,7 @@ NET_Y_M = COURT_L_M / 2
 def bail(outdir, reason):
     outdir.mkdir(parents=True, exist_ok=True)
     (outdir / "match_metrics.json").write_text(json.dumps(
-        {"available": False, "reason": reason}, indent=2))
+        {"available": False, "reason": reason}, indent=2), encoding="utf-8")
     print(json.dumps({"available": False, "reason": reason}))
     sys.exit(0)
 
@@ -277,7 +277,7 @@ def main():
         else:
             result["ball_pipeline"] = {"ok": False, "error": "TennisProject vendor or ball/bounce weights missing"}
 
-    (outdir / "match_metrics.json").write_text(json.dumps(result, indent=2))
+    (outdir / "match_metrics.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
     print(json.dumps({k: v for k, v in result.items() if k != "players"} |
                      {"players": {s: {kk: players[s][kk] for kk in
                                       ("distance_m", "avg_moving_speed_ms", "peak_speed_ms", "net_approach_frac")}
