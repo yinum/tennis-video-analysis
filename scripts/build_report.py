@@ -319,8 +319,9 @@ def main():
         "NTRP": f"{stage.get('ntrp', '?')}", "NTRP_BAND": html.escape(str(stage.get("ntrp_band", ""))),
         "UTR": html.escape(str(stage.get("utr_range", "?"))), "AVG_SCORE": f"{avg}",
         "ARCHETYPE": html.escape(str(st.get("archetype", "?"))),
-        "HANDEDNESS": html.escape(pose.get("handedness_guess", "") and
-                                  f"likely {pose['handedness_guess']}-handed" or ""),
+        "HANDEDNESS": html.escape(a.get("handedness") or
+                                  (pose.get("handedness_guess") not in (None, "", "unclear", "unknown")
+                                   and f"likely {pose['handedness_guess']}-handed" or "")),
         "STAGE_JUSTIFICATION": md_lite(stage.get("justification", "")),
         "RADAR_SVG": radar_svg(dims, prev_scores, prev_label),
         "DIM_ROWS": dim_rows, "STRENGTHS_HTML": strengths, "WEAKNESSES_HTML": weaknesses,

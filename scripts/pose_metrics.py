@@ -62,6 +62,12 @@ def line_angle_deg(p1, p2):
     return math.degrees(math.atan2(p2[1] - p1[1], p2[0] - p1[0]))
 
 
+def angle_sep_deg(a1, a2):
+    """Separation between two line angles, wrapped to [0, 90] (lines are undirected)."""
+    d = abs(a1 - a2) % 180
+    return min(d, 180 - d)
+
+
 def draw_skeleton(img, lm, w, h):
     im2 = img.copy()
     pts = [(int(p.x * w), int(p.y * h)) for p in lm]
@@ -133,7 +139,7 @@ def main():
             hp_l, hp_r = pt(L_HIP), pt(R_HIP)
             sh_c = ((sh_l[0] + sh_r[0]) / 2, (sh_l[1] + sh_r[1]) / 2)
             hp_c = ((hp_l[0] + hp_r[0]) / 2, (hp_l[1] + hp_r[1]) / 2)
-            sh_w = abs(sh_l[0] - sh_r[0]) or 1.0
+            sh_w = math.dist(sh_l, sh_r) or 1.0
             wr_l, wr_r = pt(L_WRIST), pt(R_WRIST)
 
             rec = {
@@ -144,8 +150,9 @@ def main():
                 "knee_angle_r": angle(pt(R_HIP), pt(R_KNEE), pt(R_ANKLE)),
                 "elbow_angle_l": angle(sh_l, pt(L_ELBOW), wr_l),
                 "elbow_angle_r": angle(sh_r, pt(R_ELBOW), wr_r),
-                "stance_width_ratio": round(abs(pt(L_ANKLE)[0] - pt(R_ANKLE)[0]) / sh_w, 2),
-                "shoulder_hip_sep_deg": round(abs(line_angle_deg(sh_l, sh_r) - line_angle_deg(hp_l, hp_r)), 1),
+                "stance_width_ratio": round(math.dist(pt(L_ANKLE), pt(R_ANKLE)) / sh_w, 2),
+                "shoulder_hip_sep_deg": round(angle_sep_deg(line_angle_deg(sh_l, sh_r),
+                                                            line_angle_deg(hp_l, hp_r)), 1),
                 "trunk_lean_deg": round(abs(90 - abs(line_angle_deg(hp_c, sh_c))), 1),
                 "wrist_above_head": bool(min(lm[L_WRIST].y, lm[R_WRIST].y) < lm[NOSE].y),
                 "hip_center_y_norm": round(hp_c[1] / h, 3),
