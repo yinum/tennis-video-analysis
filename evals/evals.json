@@ -1,0 +1,23 @@
+{
+  "skill_name": "tennis-video-analysis",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I have a video of my tennis practice at ~/Videos/tennis/practice_court3.mp4 — can you analyze it and tell me how good I am? My name is Yi.",
+      "expected_output": "Full pipeline run: frames extracted, tiers run per footage suitability, assessment.json written, report.md + report.html produced with NTRP band, 10 scored dimensions with evidence, strengths/weaknesses, style + pro comparison, development plan, caveats; history entry created.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "there are some tennis videos in ~/Videos/tennis/ — pick the most recent one and make a player skill report for me (player: Yi)",
+      "expected_output": "Folder scanned, video chosen and confirmed, full report generated as in eval 1.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I recorded a new session yesterday (~/Videos/tennis/session_jul.mp4). Analyze it and tell me if I improved since last time.",
+      "expected_output": "New analysis plus progress section: radar overlay vs previous session, NTRP trend chart, dimension-by-dimension progress narrative referencing the prior report's plan.",
+      "files": []
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{PLAYER}} — Tennis Skill Report</title>
+<style>
+  :root {
+    --surface-1:#fcfcfb; --page:#f9f9f7; --ink:#0b0b0b; --ink-2:#52514e;
+    --muted:#898781; --grid:#e1e0d9; --axis:#c3c2b7; --border:rgba(11,11,11,.10);
+    --series-1:#2a78d6; --good:#006300; --serious:#b8541f; --critical:#d03b3b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface-1:#1a1a19; --page:#0d0d0d; --ink:#ffffff; --ink-2:#c3c2b7;
+      --muted:#898781; --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10);
+      --series-1:#3987e5; --good:#0ca30c; --serious:#ec835a; --critical:#e66767;
+    }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--page); color:var(--ink);
+         font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  .wrap { max-width:980px; margin:0 auto; padding:32px 20px 60px; }
+  header h1 { font-size:26px; margin:0 0 2px; }
+  header .sub { color:var(--ink-2); font-size:14px; margin-bottom:24px; }
+  .card { background:var(--surface-1); border:1px solid var(--border); border-radius:10px;
+          padding:20px 22px; margin:16px 0; overflow-x:auto; }
+  h2 { font-size:16px; margin:0 0 12px; letter-spacing:.01em; }
+  h3 { font-size:14px; margin:14px 0 6px; }
+  .tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
+  .tile { background:var(--surface-1); border:1px solid var(--border); border-radius:10px; padding:14px 16px; }
+  .tile .label { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
+  .tile .value { font-size:28px; font-weight:650; margin-top:2px; }
+  .tile .note { font-size:12px; color:var(--ink-2); }
+  .cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:720px){ .cols { grid-template-columns:1fr; } }
+  table { border-collapse:collapse; width:100%; font-size:14px; }
+  th { text-align:left; color:var(--muted); font-weight:500; border-bottom:1px solid var(--axis);
+       padding:6px 8px; }
+  td { padding:7px 8px; border-bottom:1px solid var(--grid); vertical-align:top; }
+  td.num { font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .bar { height:6px; border-radius:3px; background:var(--grid); min-width:70px; }
+  .bar > i { display:block; height:6px; border-radius:3px; background:var(--series-1); }
+  ul, ol { margin:6px 0; padding-left:22px; }
+  li { margin:5px 0; }
+  .pill { display:inline-block; font-size:12px; border:1px solid var(--border); border-radius:99px;
+          padding:2px 10px; margin:2px 4px 2px 0; color:var(--ink-2); background:var(--page); }
+  .good { color:var(--good); font-weight:600; } .bad { color:var(--critical); font-weight:600; }
+  .evidence { color:var(--muted); font-size:12.5px; }
+  .gallery { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
+  .gallery figure { margin:0; }
+  .gallery img { width:100%; border-radius:8px; border:1px solid var(--border); }
+  .gallery figcaption { font-size:12px; color:var(--muted); margin-top:3px; }
+  .chart { width:100%; height:auto; }
+  .caveat { border-left:3px solid var(--serious); padding-left:12px; color:var(--ink-2); }
+  footer { color:var(--muted); font-size:12px; margin-top:28px; }
+  svg text { font-family:system-ui,-apple-system,"Segoe UI",sans-serif; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>{{PLAYER}} — Player Skill Report</h1>
+    <div class="sub">{{DATE}} · {{SESSION_META}}</div>
+  </header>
+
+  <div class="tiles">
+    <div class="tile"><div class="label">NTRP (est.)</div><div class="value">{{NTRP}}</div><div class="note">{{NTRP_BAND}}</div></div>
+    <div class="tile"><div class="label">UTR (rough)</div><div class="value">{{UTR}}</div><div class="note">video-based estimate</div></div>
+    <div class="tile"><div class="label">Profile average</div><div class="value">{{AVG_SCORE}}</div><div class="note">of 10 dimensions (1–10)</div></div>
+    <div class="tile"><div class="label">Play style</div><div class="value" style="font-size:19px">{{ARCHETYPE}}</div><div class="note">{{HANDEDNESS}}</div></div>
+  </div>
+
+  <div class="card">
+    <h2>Current stage</h2>
+    {{STAGE_JUSTIFICATION}}
+  </div>
+
+  <div class="card">
+    <h2>Skill profile</h2>
+    <div class="cols">
+      <div>{{RADAR_SVG}}</div>
+      <div>
+        <table>
+          <thead><tr><th>Dimension</th><th>Score</th><th></th></tr></thead>
+          <tbody>{{DIM_ROWS}}</tbody>
+        </table>
+      </div>
+    </div>
+    <div class="evidence" style="margin-top:8px">Scores are 1–10 against the skill rubric; each is justified with frame evidence in the sections below.</div>
+  </div>
+
+  <div class="cols">
+    <div class="card"><h2>Strengths</h2>{{STRENGTHS_HTML}}</div>
+    <div class="card"><h2>Weaknesses</h2>{{WEAKNESSES_HTML}}</div>
+  </div>
+
+  <div class="card">
+    <h2>Play style &amp; specialties</h2>
+    {{STYLE_HTML}}
+  </div>
+
+  {{MOVEMENT_CARD}}
+
+  {{TREND_CARD}}
+
+  <div class="card">
+    <h2>Development plan</h2>
+    {{PLAN_HTML}}
+  </div>
+
+  {{GALLERY_CARD}}
+
+  <div class="card">
+    <h2>What this video could not show</h2>
+    <div class="caveat">{{CAVEATS_HTML}}</div>
+  </div>
+
+  <footer>Generated by the tennis-video-analysis skill · pipeline tiers run: {{TIERS}} · video: {{VIDEO_NAME}}</footer>
+</div>
+</body>
+</html>
