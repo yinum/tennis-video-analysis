@@ -154,6 +154,8 @@ def main():
     ap.add_argument("analysis_dir")
     ap.add_argument("--player", default=None, help="overrides assessment.json player")
     ap.add_argument("--no-history", action="store_true")
+    ap.add_argument("--publish", default=None, metavar="DIR",
+                    help="also copy report.html/.md into DIR (a user-visible folder)")
     args = ap.parse_args()
 
     adir = Path(args.analysis_dir).expanduser().resolve()
@@ -335,7 +337,16 @@ def main():
         out_html = out_html.replace("{{%s}}" % k, v or "")
     (adir / "report.html").write_text(out_html)
 
+    published = None
+    if args.publish:
+        pub = Path(args.publish).expanduser()
+        pub.mkdir(parents=True, exist_ok=True)
+        for f in ("report.html", "report.md"):
+            (pub / f).write_bytes((adir / f).read_bytes())
+        published = str(pub)
+
     print(json.dumps({"report_md": str(adir / "report.md"), "report_html": str(adir / "report.html"),
+                      "published_to": published,
                       "history_entries": len(entries_for_trend), "avg_score": avg}, indent=2))
 
 

@@ -132,8 +132,11 @@ spine). Then write `ADIR/assessment.json`:
 ### 8. Build and deliver
 
 ```bash
-python3 SKILL_DIR/scripts/build_report.py ADIR --player "Yi"
+python3 SKILL_DIR/scripts/build_report.py ADIR --player "Yi" [--publish ~/tennis/<date>]
 ```
+`--publish DIR` additionally copies the two deliverables into a user-visible folder —
+use it when the user wants reports somewhere easy to find (ADIR can be buried next
+to the video, and dot-folders are hidden in Finder).
 Writes `ADIR/report.md` + self-contained `ADIR/report.html` (radar, dimension
 table, evidence gallery, progress trend once ≥2 sessions) and appends the session
 to the player's history. Then: summarize the top-line findings in chat (stage,
