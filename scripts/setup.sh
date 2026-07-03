@@ -137,7 +137,7 @@ install_weights() {
       continue
     fi
     say "Downloading $fname from Google Drive ($src)..."
-    if ! "$VENV/bin/gdown" --id "$id" -O "$f"; then
+    if ! "$VENV/bin/gdown" "$id" -O "$f"; then
       failures=$((failures+1))
       rm -f "$f"
       miss "$fname — gdown failed (Drive quota or link rot)"

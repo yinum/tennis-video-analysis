@@ -138,7 +138,9 @@ Writes `ADIR/report.md` + self-contained `ADIR/report.html` (radar, dimension
 table, evidence gallery, progress trend once ≥2 sessions) and appends the session
 to the player's history. Then: summarize the top-line findings in chat (stage,
 one headline strength, the #1 fix), give both file paths, and — if the harness can
-render HTML artifacts — offer to display the HTML report.
+render HTML artifacts — offer to display the HTML report. If the user wants to act
+on the findings, hand off to the **tennis-training-plan** skill, which turns this
+report into a periodized practice plan.
 
 ## Honesty requirements (non-negotiable)
 
