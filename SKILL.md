@@ -66,8 +66,20 @@ segments ≈ strokes/rallies), and `segments.json`.
 View `ADIR/sheets/overview_*.jpg`. Decide and note:
 - Camera angle: elevated behind-baseline with full court visible → Tier 2 eligible;
   side/net-level/partial court → Tiers 0–1 only.
-- Session type: match / rally practice / drills / serve basket (changes rubric
-  calibration — see references/rubric.md).
+- **Session context — classify explicitly, with evidence, before any scoring.**
+  Pick exactly one and record it with the frames that prove it (it drives the
+  rubric's Step 4 discount, and misreading it moves the NTRP estimate):
+  - `fed-ball drill` — balls arrive on a metronome from a feeder/basket/machine;
+    the subject never has to earn the ball (look for: no opposing rally partner
+    hitting returns, uniform incoming trajectory/tempo, feeder's arm or cart).
+  - `cooperative rally` — two players keeping the ball in play, no point
+    structure (look for: exchanges both ways, resets after misses, no serves
+    into points, no score behavior).
+  - `serve basket` — repeated serves, no returns played out.
+  - `match play` — serves start points, players compete for outcomes (look
+    for: side changes, score rituals, defensive scrambling).
+  If the clip mixes contexts or the evidence is ambiguous, say so in the report
+  caveats and score against the more conservative reading.
 - Which bursts show which strokes; whether the subject player is trackable.
 
 ### 4. Run the metric tiers (parallel where possible)
@@ -96,7 +108,11 @@ same flaw in four bursts is a finding.
 
 ### 6. Score, classify, compare
 
-- Score the 10 dimensions with `references/rubric.md`; derive NTRP band + UTR range.
+- Score the 10 dimensions with `references/rubric.md`, then derive the NTRP
+  band by running its 6-step mapping algorithm verbatim (coverage tags →
+  weighted average → provisional NTRP → context discount from the step-3
+  classification → gate check → coverage downgrade). UTR is the heuristic
+  mapping only.
 - Classify style + pick 1–3 pro comparisons with `references/styles.md`.
 - Check history: `TENNIS_HOME/players/<slug>/history.json` (slug = lowercase
   hyphenated name). If previous sessions exist, compare dimension-by-dimension and

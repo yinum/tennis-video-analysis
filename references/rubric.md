@@ -38,11 +38,43 @@ low-confidence note in `evidence` rather than guessing silently.
 | Tactics & Shot Selection | patterns (serve +1, attack short balls), direction changes at right times, risk calibration, opponent exploitation |
 | Competitive Habits | between-point routines, body language after errors, decision quality when tight, energy across the session |
 
-## Mapping scores → NTRP
+## Mapping scores → NTRP (deterministic — follow the steps in order)
 
-Compute the profile average, then weight reality: **Rally Consistency, Movement, and
-Serve carry NTRP more than the rest** — a huge forehand with 3-ball tolerance is not
-a 4.5. Sanity-check the band against these gate descriptions:
+Two independent raters must land on the same band from the same footage. Do not
+eyeball an average and adjust by feel; run this algorithm:
+
+**Step 1 — tag coverage.** Tag every dimension `observed` (direct evidence in
+frame), `proxy` (indirect evidence only, e.g. rally consistency judged from
+contact quality because ball outcomes are out of frame), or `unobserved`
+(placeholder score). The tag goes in the dimension's `evidence` field.
+
+**Step 2 — weighted average.** Average ONLY observed and proxy dimensions —
+an unobserved placeholder must never move the number. Weights: Rally
+Consistency ×2.0, Movement & Footwork ×2.0, Serve ×1.5, all others ×1.0
+(a huge forehand with 3-ball tolerance is not a 4.5). Proxy dimensions count
+at half their weight.
+
+**Step 3 — provisional NTRP.** `NTRP = 1.0 + (weighted avg) / 2`, rounded to
+the nearest 0.5, **ties round DOWN**. (avg 4 → 3.0 · avg 5 → 3.5 · avg 6 → 4.0
+· avg 7 → 4.5 — the conservative edge of the old lookup table, by design.)
+
+**Step 4 — context discount.** If the footage shows no competitive point play
+(fed-ball drill or cooperative rally only — see the session-context
+classification in SKILL.md), subtract 0.5: cooperative hitting inflates
+apparent level by about half a band versus match play.
+
+**Step 5 — gate check (down only).** Verify the gate description for the
+provisional band below is demonstrably true in the footage. If not, step down
+0.5 and re-check. Gates can only lower the number, never raise it.
+
+**Step 6 — coverage downgrade.** Count observed + proxy dimensions:
+- **8–10:** report point + half-point band (e.g., "3.5, band 3.0–4.0").
+- **5–7:** same format, but label it **provisional** and name the unobserved
+  dimensions in the caveat.
+- **≤4:** no point estimate. Report a full-point band only (e.g., "3.0–4.0,
+  insufficient coverage") and list what footage would close the gap.
+
+Gate descriptions for Step 5:
 
 | NTRP | Gate description (must be true of the video) |
 |---|---|
@@ -56,25 +88,25 @@ a 4.5. Sanity-check the band against these gate descriptions:
 | 5.5–6.0 | tournament-hardened; sustained power + consistency; near-collegiate |
 | 6.5–7.0 | world-class; not assessable from amateur footage — do not assign |
 
-Rough profile-average → NTRP starting point (then apply gates):
-avg 2 → ~2.0 · avg 3 → ~2.5–3.0 · avg 4 → ~3.0–3.5 · avg 5 → ~3.5–4.0 ·
-avg 6 → ~4.0–4.5 · avg 7 → ~4.5–5.0 · avg 8 → ~5.0+.
+**Never report a bare point estimate** — the band format from Step 6 is
+mandatory: one video cannot resolve finer than half a band, and inflated
+single numbers destroy trust.
 
-**Always report a half-point band** (e.g., "3.5, band 3.0–4.0"): one video cannot
-resolve finer than that, and inflated single numbers destroy trust.
+## UTR estimate (heuristic only)
 
-## UTR estimate
-
-UTR is match-result-based; from video you can only offer a coarse range. Use:
+UTR is computed from match results and **cannot be measured from video**; this
+mapping is a club-level correspondence heuristic, not a published calibration.
 NTRP 2.5 ≈ UTR 1–2 · 3.0 ≈ 2–3 · 3.5 ≈ 3–4 · 4.0 ≈ 4–6 · 4.5 ≈ 6–8 ·
-5.0 ≈ 8–10 · 5.5 ≈ 10–12. Label it "rough, video-based" in the report.
+5.0 ≈ 8–10 · 5.5 ≈ 10–12. Label it "rough, video-based heuristic" in the
+report, and skip it entirely when Step 6 lands in the ≤4-coverage tier.
 
 ## Calibration rules
 
 - Score what you SEE, not what the stroke could become. Potential goes in the
   development plan, not the score.
-- Cooperative rallying inflates apparent level by ~0.5 NTRP versus match play;
-  note the session type and discount accordingly.
+- Cooperative rallying inflates apparent level by ~0.5 NTRP versus match play.
+  This is applied ONCE, as Step 4 of the mapping algorithm — do not discount
+  individual dimension scores for it as well.
 - If the opponent is much weaker/stronger, consistency numbers are distorted —
   say so in caveats.
 - Practice-swing beauty ≠ level. Weight contact quality, balance at contact, and
