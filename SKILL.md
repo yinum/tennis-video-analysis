@@ -26,7 +26,12 @@ do the seeing and judging, and `build_report.py` renders the deliverables.
   vendored repos, model weights, player history
 - `VENV_PY` = `$TENNIS_HOME/venv/bin/python` (macOS/Linux) or
   `%USERPROFILE%\.tennis-analysis\venv\Scripts\python.exe` (Windows)
-- `ADIR` = `<video_dir>/<video_stem>_analysis/` — all per-video outputs
+- `ADIR` = `<video_dir>/<video_stem>_analysis/` — pipeline artifacts (frames, pose,
+  sheets) stay next to the video; videos land in different folders, so ADIRs scatter
+- Report deliverables are ALSO archived to
+  `TENNIS_HOME/players/<slug>/reports/<date>_<video_stem>/` (build_report.py does
+  this automatically) — one parent folder per player across all sessions, mirroring
+  `plans/`. Point the user there when they want to browse reports side by side.
 
 **Windows:** use `scripts/setup.ps1` instead of `setup.sh`
 (`powershell -ExecutionPolicy Bypass -File SKILL_DIR/scripts/setup.ps1 basic|full|status`;
@@ -147,10 +152,30 @@ spine). Then write `ADIR/assessment.json`:
   "history_comparison": "markdown prose (omit on first session)",
   "development_plan": [{"priority": 1, "focus": "...", "drills": ["...", "..."],
                         "success_metric": "measurable, e.g. 8/10 second serves with visible kick"}],
+  "study_videos": [{"focus": "names the development_plan priority (or pro comparison) it serves",
+                    "title": "video title from the search result — or the exact search phrase when url is null",
+                    "url": "https://... or null", "platform": "youtube | bilibili",
+                    "why": "one line: what to watch for, tied to this player's specific flaw"}],
   "caveats": ["single session", "no doubles/match context", "..."],
   "key_frames": ["pose/annotated/...jpg", "frames/burst_2/...jpg"]
 }
 ```
+
+**study_videos (required, 3–5 entries).** Each entry serves a development_plan
+priority or pro comparison — pro slow-motion for pattern study, drill tutorials for
+the fixes. Sourcing rules:
+
+- A `url` may only come from a web search you ran **this session** (WebSearch or
+  equivalent). Never write a video URL from memory — remembered video IDs are
+  almost always dead links. No search tool in this harness → set `"url": null`
+  and put the exact search phrase in `title`; the report renders it as a
+  suggested search.
+- Query patterns that work: YouTube `"<pro> <stroke> slow motion"`,
+  `"tennis <flaw> drill"`; Bilibili `site:bilibili.com 网球 <技术> 慢动作/教学`.
+  Reliable YouTube channels for slow-motion pro technique: Be Gr8 at Tennis,
+  Top Tennis Training, Feel Tennis, Essential Tennis.
+- Search Bilibili as well as YouTube; include a Bilibili entry whenever a relevant
+  result exists (many players prefer Chinese-language instruction — ask if unsure).
 
 ### 8. Build and deliver
 
@@ -161,8 +186,10 @@ python3 SKILL_DIR/scripts/build_report.py ADIR --player "Yi" [--publish ~/tennis
 use it when the user wants reports somewhere easy to find (ADIR can be buried next
 to the video, and dot-folders are hidden in Finder).
 Writes `ADIR/report.md` + self-contained `ADIR/report.html` (radar, dimension
-table, evidence gallery, progress trend once ≥2 sessions) and appends the session
-to the player's history. Then: summarize the top-line findings in chat (stage,
+table, evidence gallery, progress trend once ≥2 sessions), archives both files to
+`TENNIS_HOME/players/<slug>/reports/<date>_<video_stem>/` (the one-parent-per-player
+home; skipped under `--no-history`), and appends the session to the player's
+history. Then: summarize the top-line findings in chat (stage,
 one headline strength, the #1 fix), give both file paths, and — if the harness can
 render HTML artifacts — offer to display the HTML report. If the user wants to act
 on the findings, hand off to the **tennis-training-plan** skill, which turns this

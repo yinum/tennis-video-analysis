@@ -156,6 +156,8 @@ def main():
     ap.add_argument("--no-history", action="store_true")
     ap.add_argument("--publish", default=None, metavar="DIR",
                     help="also copy report.html/.md into DIR (a user-visible folder)")
+    ap.add_argument("--no-study-videos", action="store_true",
+                    help="allow building a legacy assessment.json that predates the study_videos key")
     args = ap.parse_args()
 
     adir = Path(args.analysis_dir).expanduser().resolve()
@@ -168,6 +170,10 @@ def main():
     missing = [k for k in REQUIRED if k not in a]
     if missing:
         sys.exit(f"ERROR: assessment.json missing keys: {missing}")
+    if not a.get("study_videos") and not args.no_study_videos:
+        sys.exit("ERROR: assessment.json has no 'study_videos' (3-5 recommended learning videos "
+                 "matched to the development plan — schema and sourcing rules in SKILL.md step 7). "
+                 "Only for legacy assessments, pass --no-study-videos.")
     dims = a["dimensions"]
     if len(dims) < 6:
         sys.exit("ERROR: expected the 10 rubric dimensions (got %d)" % len(dims))
@@ -193,12 +199,17 @@ def main():
                  "ntrp": stage.get("ntrp"), "utr_range": stage.get("utr_range"),
                  "archetype": a["style"].get("archetype"), "avg": avg,
                  "scores": {d["name"]: d["score"] for d in dims},
-                 "report": str(adir / "report.html")}
+                 "report": str(adir / "report.html"),
+                 "report_archive": str(TENNIS_HOME / "players" / slugify(a["player"]) / "reports"
+                                       / f"{today}_{Path(video_name).stem or 'video'}" / "report.html")}
         hist["entries"] = [e for e in hist["entries"] if e.get("analysis_dir") != str(adir)]
         prior = sorted(hist["entries"], key=lambda e: e["date"])
-        if prior:
-            prev_scores, prev_label = prior[-1]["scores"], prior[-1]["date"]
-        hist["entries"] = prior + [entry]
+        # "previous session" = latest session strictly BEFORE this one, so rebuilding
+        # an old session never compares against a newer one
+        before = [e for e in prior if e["date"] < today]
+        if before:
+            prev_scores, prev_label = before[-1]["scores"], before[-1]["date"]
+        hist["entries"] = sorted(prior + [entry], key=lambda e: e["date"])
         hfile.write_text(json.dumps(hist, indent=2), encoding="utf-8")
         entries_for_trend = [e for e in hist["entries"] if isinstance(e.get("ntrp"), (int, float))]
 
@@ -235,6 +246,13 @@ def main():
     md += [f"{p.get('priority', i + 1)}. **{p['focus']}** — drills: {'; '.join(p.get('drills', []))}. "
            f"Success metric: {p.get('success_metric', 'n/a')}"
            for i, p in enumerate(a["development_plan"])]
+    svids = a.get("study_videos") or []
+    if svids:
+        md += ["", "## Recommended study videos"]
+        for v in svids:
+            label = (f"[{v.get('title', 'video')}]({v['url']})" if v.get("url")
+                     else f"search: “{v.get('title', '')}”")
+            md += [f"- **{v.get('focus', '')}** — {label} ({v.get('platform', 'web')}) — {v.get('why', '')}"]
     md += ["", "## What this video could not show"]
     md += [f"- {c}" for c in a["caveats"]]
     (adir / "report.md").write_text("\n".join(md), encoding="utf-8")
@@ -314,6 +332,18 @@ def main():
     if figs:
         gallery = f"<div class='card'><h2>Evidence frames</h2><div class='gallery'>{figs}</div></div>"
 
+    study = ""
+    if svids:
+        items = ""
+        for v in svids:
+            title = html.escape(str(v.get("title", "video")))
+            link = (f"<a href='{html.escape(str(v['url']), quote=True)}' target='_blank' rel='noopener'>{title}</a>"
+                    if v.get("url") else f"search: &ldquo;{title}&rdquo;")
+            items += (f"<li><strong>{html.escape(str(v.get('focus', '')))}</strong> — {link} "
+                      f"<span class='pill'>{html.escape(str(v.get('platform', 'web')))}</span>"
+                      f"<div class='evidence'>{html.escape(str(v.get('why', '')))}</div></li>")
+        study = f"<div class='card'><h2>Recommended study videos</h2><ul>{items}</ul></div>"
+
     subs = {
         "PLAYER": html.escape(a["player"]), "DATE": today,
         "SESSION_META": html.escape(f"{a.get('session_type', 'session')} · "
@@ -328,7 +358,7 @@ def main():
         "RADAR_SVG": radar_svg(dims, prev_scores, prev_label),
         "DIM_ROWS": dim_rows, "STRENGTHS_HTML": strengths, "WEAKNESSES_HTML": weaknesses,
         "STYLE_HTML": style_html, "MOVEMENT_CARD": movement, "TREND_CARD": trend,
-        "PLAN_HTML": plan_html, "GALLERY_CARD": gallery,
+        "PLAN_HTML": plan_html, "GALLERY_CARD": gallery, "STUDY_CARD": study,
         "CAVEATS_HTML": "<ul>" + "".join(f"<li>{html.escape(c)}</li>" for c in a["caveats"]) + "</ul>",
         "TIERS": ", ".join(str(t) for t in tiers), "VIDEO_NAME": html.escape(video_name),
     }
@@ -336,6 +366,17 @@ def main():
     for k, v in subs.items():
         out_html = out_html.replace("{{%s}}" % k, v or "")
     (adir / "report.html").write_text(out_html, encoding="utf-8")
+
+    # canonical archive: every session's deliverables under ONE parent per player,
+    # mirroring plans/ — ADIR stays next to the video for pipeline artifacts only
+    archive = None
+    if not args.no_history:
+        stem = Path(video_name).stem or "video"
+        archive_dir = TENNIS_HOME / "players" / slugify(a["player"]) / "reports" / f"{today}_{stem}"
+        archive_dir.mkdir(parents=True, exist_ok=True)
+        for f in ("report.html", "report.md"):
+            (archive_dir / f).write_bytes((adir / f).read_bytes())
+        archive = str(archive_dir)
 
     published = None
     if args.publish:
@@ -346,7 +387,7 @@ def main():
         published = str(pub)
 
     print(json.dumps({"report_md": str(adir / "report.md"), "report_html": str(adir / "report.html"),
-                      "published_to": published,
+                      "report_archive": archive, "published_to": published,
                       "history_entries": len(entries_for_trend), "avg_score": avg}, indent=2))
 
 
